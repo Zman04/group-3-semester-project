@@ -1,22 +1,16 @@
 # Vertical Ball Physics Simulation
 
-A clean Python 3 physics simulation of a ball falling with realistic vertical motion, including gravity, air resistance, and bouncing.
+A clean Python 3 physics simulation of a ball falling with realistic vertical motion, including gravity, air resistance, and bouncing. The project has been refactored into a modular architecture with separated concerns.
 
 ## Features
 
-- **Realistic Physics**: Implements gravity (9.81 m/s²), energy loss on bouncing
-- **Smooth Visualization**: Pygame-based rendering with smooth camera following
-- **Real-time Information**: Displays position, velocity, acceleration, and energy
-- **Interactive Controls**: Reset ball, toggle info display, and quit functionality
-- **Clean Architecture**: Modular design for easy extension and web adaptation
-
-## Physics Implementation
-
-The simulation includes:
-- **Gravity**: Constant downward acceleration
-- **Air Resistance**: Drag force proportional to velocity squared and cross-sectional area
-- **Bouncing**: Energy loss on ground collision with damping factor
-- **Fixed Time Step**: Consistent 60 FPS physics updates for stability
+- **Modular Architecture**: Separated concerns for better maintainability and testing
+- **Physics Engine**: Dedicated physics module with proper state management
+- **Rendering System**: Optimized rendering with texture caching
+- **Time Control**: Advanced time management with history and stepping
+- **GUI System**: Improved GUI with proper event handling
+- **Comprehensive Testing**: Unit tests and integration tests
+- **Error Handling**: Robust error handling and logging throughout
 
 ## Installation
 
@@ -30,59 +24,76 @@ The simulation includes:
 
 Run the simulation:
 ```bash
-python src/main.py
+python src/main_refactored.py
 ```
 
 ### Controls
-- **SPACE**: Reset ball to initial position
-- **I**: Toggle physics information display
+- **Time Controls**: Play/Pause, Step, Custom Time Increments
+- **Step Modes**: Frame-based or Time-based stepping
+- **History**: Rewind functionality with state history
+- **I**: Toggle info display
 - **ESC**: Quit simulation
 
 ## Project Structure
 
 ```
-python-vertical-toss/
+project/
 ├── src/
-│   └── main.py          # Main simulation code
+│   ├── main_refactored.py  # Main orchestrator
+│   ├── config.py           # Configuration constants
+│   ├── physics.py          # Physics engine
+│   ├── renderer.py         # Rendering system
+│   ├── time_manager.py     # Time control
+│   ├── gui.py             # GUI components
+│   └── test_refactored.py # Test suite
 ├── assets/
-│   └── circle.png       # Ball texture (future use)
-├── requirements.txt     # Python dependencies
-└── README.md           # This file
+│   └── circle.png         # Ball texture
+├── requirements.txt       # Python dependencies
+└── README.md             # This file
 ```
 
-## Physics Classes
+## Architecture Overview
 
-### PhysicsBall
-- Handles individual ball physics
-- Updates position, velocity, and acceleration
-- Manages collision detection and response
+### Config Module
+- Centralizes all configuration constants
+- Makes the codebase more maintainable
+- Eliminates magic numbers
 
-### PhysicsSimulation
-- Main simulation controller
-- Handles rendering and user input
-- Manages camera and UI
+### Physics Engine
+- Handles ball physics calculations
+- Manages state and collisions
+- Independent of rendering and UI
 
-## Future Web Adaptation
+### Renderer
+- Optimized rendering system
+- Texture caching for better performance
+- Handles all visual elements
 
-The code is structured to be easily adaptable for web use:
-- Physics calculations are separated from rendering
-- Clean class interfaces
-- No platform-specific dependencies in physics code
+### Time Manager
+- Controls simulation time flow
+- Manages state history
+- Provides stepping and rewind functionality
 
-Potential web frameworks:
-- Pygame-web (pygame compiled to WebAssembly)
-- Pyodide (Python in browser)
-- Rewrite physics in JavaScript/TypeScript
+### GUI System
+- Event-driven GUI components
+- Clean separation from game logic
+- Improved user interaction
 
-## Customization
+## Testing
 
-You can easily modify physics parameters in the `PhysicsBall` class:
-- `gravity`: Gravitational acceleration
-- `air_resistance_coefficient`: Drag coefficient
-- `bounce_damping`: Energy loss on bounce
-- `mass` and `radius`: Ball properties
+The project includes comprehensive tests:
+- Unit tests for individual modules
+- Integration tests for module interactions
+- Import verification
+- Physics engine validation
+- Time management testing
 
 ## Requirements
 
 - Python 3.7+
-- Pygame 2.5.0+ 
+- Pygame 2.5.0+
+
+## Future Enhancements
+
+Planned improvements:
+- Additional visual effects
