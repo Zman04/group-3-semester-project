@@ -27,7 +27,7 @@ class Ball:
         
         # Load ball texture
         try:
-            self.texture = pygame.image.load("asset/circle.png")
+            self.texture = pygame.image.load("assets/circle.png")
             # Scale texture to match radius
             scaled_size = (int(radius * 2), int(radius * 2))
             self.texture = pygame.transform.scale(self.texture, scaled_size)
