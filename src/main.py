@@ -27,11 +27,11 @@ class Ball:
         
         # Load ball texture
         try:
-            self.texture = pygame.image.load("assets/circle.png")
+            self.texture = pygame.image.load("asset/circle.png")
             # Scale texture to match radius
             scaled_size = (int(radius * 2), int(radius * 2))
             self.texture = pygame.transform.scale(self.texture, scaled_size)
-        except pygame.error:
+        except (pygame.error, FileNotFoundError, OSError):
             print("Warning: Could not load circle.png, using default circle")
             self.texture = None
         
