@@ -80,6 +80,7 @@ class PhysicsSimulationUI {
         this.infoPanel.innerHTML = `
             <div>Time: ${this.state.time.toFixed(3)} s</div>
             <div>Position: (${ball.x.toFixed(1)}, ${ball.y.toFixed(1)}) px</div>
+            <div>Height above ground: ${height_above_ground.toFixed(1)} px</div>
             <div>Velocity: ${ball.velocity_y.toFixed(1)} px/s</div>
             <div>Acceleration: ${ball.acceleration_y.toFixed(1)} px/s²</div>
             <div>Energy: ${total_energy.toFixed(0)} J</div>
@@ -98,25 +99,11 @@ class PhysicsSimulationUI {
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, width, height);
         
-        // Draw grid
-        ctx.strokeStyle = '#1a1a1a';
-        ctx.lineWidth = 1;
+        // Draw main grid
+        this.drawGrid(ctx, width, height);
         
-        // Vertical grid lines
-        for (let x = 0; x < width; x += 50) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, this.state.ground_y);
-            ctx.stroke();
-        }
-        
-        // Horizontal grid lines
-        for (let y = 0; y < this.state.ground_y; y += 50) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(width, y);
-            ctx.stroke();
-        }
+        // Draw axes
+        this.drawAxes(ctx, width, height);
         
         // Draw ground line
         ctx.strokeStyle = '#6464ff';
@@ -148,6 +135,117 @@ class PhysicsSimulationUI {
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
         ctx.fill();
+    }
+    
+    drawGrid(ctx, width, height) {
+        // Fine grid (every 25 pixels)
+        ctx.strokeStyle = '#0f0f0f';
+        ctx.lineWidth = 0.5;
+        
+        for (let x = 0; x < width; x += 25) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, this.state.ground_y);
+            ctx.stroke();
+        }
+        
+        for (let y = 0; y < this.state.ground_y; y += 25) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+        
+        // Major grid (every 100 pixels)
+        ctx.strokeStyle = '#1f1f1f';
+        ctx.lineWidth = 1;
+        
+        for (let x = 0; x < width; x += 100) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, this.state.ground_y);
+            ctx.stroke();
+        }
+        
+        for (let y = 0; y < this.state.ground_y; y += 100) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+    }
+    
+    drawAxes(ctx, width, height) {
+        // Vertical axis (Y-axis)
+        const axisX = 100; // Moved right from 60 to 80 pixels
+        
+        // Draw vertical axis line
+        ctx.strokeStyle = '#4a4a4a';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(axisX, 0);
+        ctx.lineTo(axisX, this.state.ground_y);
+        ctx.stroke();
+        
+        // Draw tick marks and labels for height
+        ctx.fillStyle = '#cccccc';
+        ctx.font = '12px monospace';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        
+        // Major ticks every 100 pixels
+        for (let y = 0; y <= this.state.ground_y; y += 100) {
+            const heightFromGround = this.state.ground_y - y;
+            
+            // Draw tick mark
+            ctx.strokeStyle = '#4a4a4a';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(axisX - 8, y);
+            ctx.lineTo(axisX + 8, y);
+            ctx.stroke();
+            
+            // Draw label
+            ctx.fillText(`${heightFromGround}px`, axisX - 12, y);
+        }
+        
+        // Minor ticks every 50 pixels
+        ctx.strokeStyle = '#3a3a3a';
+        ctx.lineWidth = 1;
+        for (let y = 50; y <= this.state.ground_y; y += 100) {
+            ctx.beginPath();
+            ctx.moveTo(axisX - 4, y);
+            ctx.lineTo(axisX + 4, y);
+            ctx.stroke();
+            
+            // Add 50px labels for better granularity
+            if (y < this.state.ground_y) {
+                const heightFromGround = this.state.ground_y - y;
+                ctx.fillStyle = '#999999';
+                ctx.font = '10px monospace';
+                ctx.fillText(`${heightFromGround}`, axisX - 12, y);
+                ctx.fillStyle = '#cccccc';
+                ctx.font = '12px monospace';
+            }
+        }
+        
+        // Add axis label
+        ctx.save();
+        ctx.translate(30, this.state.ground_y / 2); // Moved left from 20 to 30 pixels
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Height (pixels)', 0, 0);
+        ctx.restore();
+        
+        // Add ground level indicator - moved down 20 pixels below ground line
+        ctx.fillStyle = '#6464ff';
+        ctx.font = 'bold 12px monospace';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top'; // Changed from 'middle' to 'top'
+        ctx.fillText('Ground Level (0px)', axisX + 20, this.state.ground_y + 8); // Added +8 pixels of padding
     }
 }
 
