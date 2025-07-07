@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Ball Simulation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="simulation-area">
+            <canvas id="simulationCanvas"></canvas>
+        </div>
+        <div class="control-panel">
+            <div class="info-panel">
+                <h3>Simulation Info</h3>
+                <div id="simulationInfo"></div>
+            </div>
+            <div class="controls">
+                <h3>Controls</h3>
+                <button id="playPauseBtn">Play</button>
+                <button id="resetBtn">Reset</button>
+                <button id="stepBtn">Step +1s</button>
+                <div class="input-group">
+                    <label for="stepValue">Step Value (seconds):</label>
+                    <input type="number" id="stepValue" value="1.0" step="0.1">
+                    <button id="customStepBtn">Custom Step</button>
+                </div>
+                <div class="input-group">
+                    <label for="timeValue">Set Time (seconds):</label>
+                    <input type="number" id="timeValue" value="0.0" step="0.1">
+                    <button id="setTimeBtn">Set Time</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+</html> 
