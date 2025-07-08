@@ -9,7 +9,15 @@
 <body>
     <div class="container">
         <div class="simulation-area">
-            <canvas id="simulationCanvas"></canvas>
+            <div class="viewport-controls">
+                <button id="zoomInBtn">Zoom In</button>
+                <button id="zoomOutBtn">Zoom Out</button>
+                <button id="resetViewBtn">Reset View</button>
+                <span class="zoom-level">Zoom: 100%</span>
+            </div>
+            <div class="physics-viewport" id="physicsViewport">
+                <canvas id="simulationCanvas"></canvas>
+            </div>
         </div>
         <div class="control-panel">
             <div class="info-panel">
