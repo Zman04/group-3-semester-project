@@ -23,7 +23,7 @@ class PhysicsSimulationUI {
         
         // Physics viewport settings
         this.canvasWidth = 2000;  // Fixed logical canvas width
-        this.canvasHeight = 1500; // Fixed logical canvas height
+        this.canvasHeight = 1400; // Reduced by 100px to raise ground
         this.zoomLevel = 1.0;     // Current zoom level
         this.panX = 0;            // Pan offset X
         this.panY = 0;            // Pan offset Y
@@ -130,13 +130,15 @@ class PhysicsSimulationUI {
         this.panY = 0;
         this.setZoom(1.0);
         
-        // Center the canvas in the viewport
+        // Align with left and bottom edges
         setTimeout(() => {
             const viewportRect = this.viewport.getBoundingClientRect();
-            const canvasRect = this.canvas.getBoundingClientRect();
             
-            this.viewport.scrollLeft = (this.canvasWidth * this.zoomLevel - viewportRect.width) / 2;
-            this.viewport.scrollTop = (this.canvasHeight * this.zoomLevel - viewportRect.height) / 2;
+            // Scroll to show the left edge
+            this.viewport.scrollLeft = 0;
+            
+            // Scroll to show the bottom, but keep some margin for visibility
+            this.viewport.scrollTop = (this.canvasHeight * this.zoomLevel) - viewportRect.height;
         }, 10);
     }
     
@@ -189,10 +191,10 @@ class PhysicsSimulationUI {
     // Transform physics coordinates to canvas coordinates
     physicsToCanvas(physicsX, physicsY) {
         // Fixed coordinate system: 1 physics unit = 1 pixel
-        // Ground at y=0 physics -> bottom of canvas
+        // Ground at y=0 physics -> 100px from bottom of canvas
         return {
             x: physicsX * this.pixelsPerUnit,
-            y: this.canvasHeight - (physicsY * this.pixelsPerUnit)
+            y: (this.canvasHeight - 100) - (physicsY * this.pixelsPerUnit)
         };
     }
     
@@ -215,8 +217,8 @@ class PhysicsSimulationUI {
         ctx.strokeStyle = '#6464ff';
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(0, this.canvasHeight);
-        ctx.lineTo(this.canvasWidth, this.canvasHeight);
+        ctx.moveTo(0, this.canvasHeight - 100);
+        ctx.lineTo(this.canvasWidth, this.canvasHeight - 100);
         ctx.stroke();
         
         // Transform ball coordinates
@@ -350,7 +352,7 @@ class PhysicsSimulationUI {
         ctx.font = 'bold 12px monospace';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'bottom';
-        ctx.fillText('Ground Level (0)', axisX + 20, this.canvasHeight - 5);
+        ctx.fillText('Ground Level (0)', axisX + 20, this.canvasHeight - 80);
     }
 }
 

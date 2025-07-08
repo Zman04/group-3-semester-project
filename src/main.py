@@ -613,7 +613,7 @@ class PhysicsSimulation:
         self.background = self.screen.copy()
         self.background.fill((0, 0, 0))  # Black background
         
-        # Draw ground line
+        # Draw ground line floor
         pygame.draw.line(self.background, (100, 100, 255), 
                         (0, self.ground_y), (self.width, self.ground_y), 3)
         
