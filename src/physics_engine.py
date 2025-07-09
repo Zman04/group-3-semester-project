@@ -5,7 +5,7 @@ class Ball:
     
     def __init__(self, x: float, y: float, radius: float = 20, mass: float = 1.0):
         self.x = x
-        self.y = y
+        self.y = y  # Physics coordinates: y=0 at ground, positive up
         self.radius = radius
         self.mass = mass
         
@@ -14,12 +14,13 @@ class Ball:
         self.acceleration_y = 0.0
         
         # Constants
-        self.gravity = 6000.0  # pixels/s²
+        self.gravity = -6000.0  # Negative because positive y is up
         self.bounce_damping = 0.8
         
-    def update(self, dt: float, ground_y: float):
+    def update(self, dt: float):
         """Update ball physics for one time step."""
-        is_at_rest = self.velocity_y == 0 and self.y + self.radius >= ground_y
+        # Ball is at rest if it's on the ground with no velocity
+        is_at_rest = self.velocity_y == 0 and self.y <= self.radius
         if not is_at_rest:
             self.acceleration_y = self.gravity
         else:
@@ -28,10 +29,10 @@ class Ball:
         self.velocity_y += self.acceleration_y * dt
         self.y += self.velocity_y * dt
         
-    def check_ground_collision(self, ground_y: float):
+    def check_ground_collision(self):
         """Check and handle collision with the ground."""
-        if self.y + self.radius >= ground_y:
-            self.y = ground_y - self.radius
+        if self.y <= self.radius:  # Ground is at y=0
+            self.y = self.radius
             self.velocity_y = -self.velocity_y * self.bounce_damping
             
             if abs(self.velocity_y) < 50:
@@ -41,7 +42,7 @@ class Ball:
         """Get the current state of the ball as a tuple."""
         return {
             'x': self.x,
-            'y': self.y,
+            'y': self.y,  # Physics coordinates
             'radius': self.radius,
             'velocity_y': self.velocity_y,
             'acceleration_y': self.acceleration_y
@@ -60,10 +61,9 @@ class PhysicsSimulation:
     def __init__(self, width: int = 800, height: int = 600):
         self.width = width
         self.height = height
-        self.ground_y = height - 50
         
-        # Create ball
-        self.ball = Ball(width // 2, 100)
+        # Create ball at physics coordinates (x=center, y=400 units above ground)
+        self.ball = Ball(width // 2, 400)
         
         # Time control properties
         self.simulation_time = 0.0
@@ -76,12 +76,40 @@ class PhysicsSimulation:
         self.time_history = []
         self.max_history = 500
         
+        # Viewport settings for dynamic scaling
+        self.viewport_padding = 50  # Padding around content
+        self.min_viewport_height = 600  # Minimum height to show
+        
+    def get_viewport_bounds(self):
+        """Calculate optimal viewport bounds based on ball position and history."""
+        max_height = max(self.ball.y + self.ball.radius + self.viewport_padding, self.min_viewport_height)
+        
+        return {
+            'min_x': 0,
+            'max_x': self.width,
+            'min_y': -300,  # Allow 300 units below ground
+            'max_y': max_height
+        }
+    
+    def physics_to_canvas_y(self, physics_y, canvas_height):
+        """Convert physics y-coordinate to canvas y-coordinate."""
+        bounds = self.get_viewport_bounds()
+        # Flip y-axis: physics y=0 (ground) -> canvas bottom, physics y=max -> canvas top
+        normalized_y = (physics_y - bounds['min_y']) / (bounds['max_y'] - bounds['min_y'])
+        return canvas_height - (normalized_y * canvas_height)
+    
+    def canvas_to_physics_y(self, canvas_y, canvas_height):
+        """Convert canvas y-coordinate to physics y-coordinate."""
+        bounds = self.get_viewport_bounds()
+        normalized_y = (canvas_height - canvas_y) / canvas_height
+        return bounds['min_y'] + (normalized_y * (bounds['max_y'] - bounds['min_y']))
+        
     def update(self):
         """Update simulation state."""
         if self.is_playing:
             self.save_state()
-            self.ball.update(self.dt, self.ground_y)
-            self.ball.check_ground_collision(self.ground_y)
+            self.ball.update(self.dt)
+            self.ball.check_ground_collision()
             self.simulation_time += self.dt
             
         return self.get_state()
@@ -97,13 +125,14 @@ class PhysicsSimulation:
     
     def get_state(self):
         """Get current simulation state."""
+        bounds = self.get_viewport_bounds()
         return {
             'ball': self.ball.get_state(),
             'time': self.simulation_time,
             'is_playing': self.is_playing,
-            'ground_y': self.ground_y,
             'width': self.width,
-            'height': self.height
+            'height': self.height,
+            'viewport': bounds
         }
     
     def toggle_play_pause(self):
@@ -115,7 +144,16 @@ class PhysicsSimulation:
         """Reset the simulation to initial state."""
         self.simulation_time = 0.0
         self.is_playing = False
-        self.ball = Ball(self.width // 2, 100)
+        self.ball = Ball(self.width // 2, 400)  # Start 400 units above ground
+        self.history.clear()
+        self.time_history.clear()
+        return self.get_state()
+    
+    def set_start_y(self, start_y):
+        """Set the ball's starting y position and reset the simulation."""
+        self.simulation_time = 0.0
+        self.is_playing = False
+        self.ball = Ball(self.width // 2, start_y)
         self.history.clear()
         self.time_history.clear()
         return self.get_state()
@@ -126,8 +164,8 @@ class PhysicsSimulation:
             steps = int(time_step / self.dt)
             for _ in range(steps):
                 self.save_state()
-                self.ball.update(self.dt, self.ground_y)
-                self.ball.check_ground_collision(self.ground_y)
+                self.ball.update(self.dt)
+                self.ball.check_ground_collision()
                 self.simulation_time += self.dt
         elif time_step < 0:
             target_time = max(0, self.simulation_time + time_step)

@@ -9,7 +9,15 @@
 <body>
     <div class="container">
         <div class="simulation-area">
-            <canvas id="simulationCanvas"></canvas>
+            <div class="viewport-controls">
+                <button id="zoomInBtn">Zoom In</button>
+                <button id="zoomOutBtn">Zoom Out</button>
+                <button id="resetViewBtn">Reset View</button>
+                <span class="zoom-level">Zoom: 100%</span>
+            </div>
+            <div class="physics-viewport" id="physicsViewport">
+                <canvas id="simulationCanvas"></canvas>
+            </div>
         </div>
         <div class="control-panel">
             <div class="info-panel">
@@ -30,6 +38,11 @@
                     <label for="timeValue">Set Time (seconds):</label>
                     <input type="number" id="timeValue" value="0.0" step="0.1">
                     <button id="setTimeBtn">Set Time</button>
+                </div>
+                <div class="input-group">
+                    <label for="startYValue">Ball Start Y Position:</label>
+                    <input type="number" id="startYValue" value="400" step="10">
+                    <button id="setStartYBtn">Set Start Position</button>
                 </div>
             </div>
         </div>
