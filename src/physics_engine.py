@@ -87,7 +87,7 @@ class PhysicsSimulation:
         return {
             'min_x': 0,
             'max_x': self.width,
-            'min_y': 0,  # Ground level
+            'min_y': -300,  # Allow 300 units below ground
             'max_y': max_height
         }
     
@@ -95,14 +95,14 @@ class PhysicsSimulation:
         """Convert physics y-coordinate to canvas y-coordinate."""
         bounds = self.get_viewport_bounds()
         # Flip y-axis: physics y=0 (ground) -> canvas bottom, physics y=max -> canvas top
-        normalized_y = physics_y / bounds['max_y']
+        normalized_y = (physics_y - bounds['min_y']) / (bounds['max_y'] - bounds['min_y'])
         return canvas_height - (normalized_y * canvas_height)
     
     def canvas_to_physics_y(self, canvas_y, canvas_height):
         """Convert canvas y-coordinate to physics y-coordinate."""
         bounds = self.get_viewport_bounds()
         normalized_y = (canvas_height - canvas_y) / canvas_height
-        return normalized_y * bounds['max_y']
+        return bounds['min_y'] + (normalized_y * (bounds['max_y'] - bounds['min_y']))
         
     def update(self):
         """Update simulation state."""

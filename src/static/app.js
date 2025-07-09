@@ -22,8 +22,8 @@ class PhysicsSimulationUI {
         this.zoomLevelSpan = document.querySelector('.zoom-level');
         
         // Physics viewport settings
-        this.canvasWidth = 2000;  // Fixed logical canvas width
-        this.canvasHeight = 1400; // Reduced by 100px to raise ground
+        this.canvasWidth = 2000;  // Back to reasonable size for performance
+        this.canvasHeight = 1500; // Back to reasonable size for performance
         this.zoomLevel = 1.0;     // Current zoom level
         this.panX = 0;            // Pan offset X
         this.panY = 0;            // Pan offset Y
@@ -118,7 +118,8 @@ class PhysicsSimulationUI {
     }
     
     setZoom(newZoom) {
-        this.zoomLevel = Math.max(0.1, Math.min(5.0, newZoom));
+        // Limit zoom out to 3x from default (1.0 / 3 = 0.33)
+        this.zoomLevel = Math.max(0.58, Math.min(5.0, newZoom));
         this.canvas.style.width = `${this.canvasWidth * this.zoomLevel}px`;
         this.canvas.style.height = `${this.canvasHeight * this.zoomLevel}px`;
         this.zoomLevelSpan.textContent = `Zoom: ${Math.round(this.zoomLevel * 100)}%`;
@@ -213,12 +214,17 @@ class PhysicsSimulationUI {
         // Draw axes
         this.drawAxes(ctx);
         
-        // Draw ground line at bottom of canvas
+        // Draw ground line - dynamic based on visible area
+        const viewportRect = this.viewport.getBoundingClientRect();
+        const visibleWidth = viewportRect.width / this.zoomLevel;
+        const scrollLeft = this.viewport.scrollLeft / this.zoomLevel;
+        const groundWidth = Math.max(this.canvasWidth, scrollLeft + visibleWidth + 1000);
+        
         ctx.strokeStyle = '#6464ff';
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.moveTo(0, this.canvasHeight - 100);
-        ctx.lineTo(this.canvasWidth, this.canvasHeight - 100);
+        ctx.lineTo(groundWidth, this.canvasHeight - 100);
         ctx.stroke();
         
         // Transform ball coordinates
@@ -255,28 +261,52 @@ class PhysicsSimulationUI {
         const majorGridSpacing = 100; // 100 physics units
         const minorGridSpacing = 25;  // 25 physics units
         
-        // Convert to canvas coordinates
-        const majorSpacing = majorGridSpacing * this.pixelsPerUnit;
-        const minorSpacing = minorGridSpacing * this.pixelsPerUnit;
+        // Calculate visible area based on zoom level
+        const viewportRect = this.viewport.getBoundingClientRect();
+        const visibleWidth = viewportRect.width / this.zoomLevel;
+        const visibleHeight = viewportRect.height / this.zoomLevel;
+        const scrollLeft = this.viewport.scrollLeft / this.zoomLevel;
+        const scrollTop = this.viewport.scrollTop / this.zoomLevel;
+        
+        // Calculate buffer based on zoom level - more buffer when zoomed out
+        const buffer = Math.max(2000, 1000 / this.zoomLevel);
+        
+        // Extend grid to cover visible area plus buffer
+        const gridWidth = Math.max(this.canvasWidth, scrollLeft + visibleWidth + buffer);
+        const gridHeight = Math.max(this.canvasHeight, scrollTop + visibleHeight + buffer);
+        
+        // Calculate the actual range we need to draw, with some padding
+        const leftBound = Math.max(0, scrollLeft - buffer);
+        const rightBound = Math.min(gridWidth, scrollLeft + visibleWidth + buffer);
+        const topBound = Math.max(-300, scrollTop - buffer);
+        const bottomBound = Math.min(gridHeight, scrollTop + visibleHeight + buffer);
         
         // Draw minor grid
         ctx.strokeStyle = '#0f0f0f';
         ctx.lineWidth = 0.5;
         
         // Vertical lines
-        for (let x = 0; x <= this.canvasWidth; x += minorSpacing) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, this.canvasHeight);
-            ctx.stroke();
+        const startX = Math.floor(leftBound / minorGridSpacing) * minorGridSpacing;
+        const endX = Math.ceil(rightBound / minorGridSpacing) * minorGridSpacing;
+        for (let x = startX; x <= endX; x += minorGridSpacing) {
+            if (x >= 0 && x <= gridWidth) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, gridHeight);
+                ctx.stroke();
+            }
         }
         
         // Horizontal lines
-        for (let y = 0; y <= this.canvasHeight; y += minorSpacing) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(this.canvasWidth, y);
-            ctx.stroke();
+        const startY = Math.floor(topBound / minorGridSpacing) * minorGridSpacing;
+        const endY = Math.ceil(bottomBound / minorGridSpacing) * minorGridSpacing;
+        for (let y = startY; y <= endY; y += minorGridSpacing) {
+            if (y >= -300 && y <= gridHeight) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(gridWidth, y);
+                ctx.stroke();
+            }
         }
         
         // Draw major grid
@@ -284,19 +314,27 @@ class PhysicsSimulationUI {
         ctx.lineWidth = 1;
         
         // Vertical lines
-        for (let x = 0; x <= this.canvasWidth; x += majorSpacing) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, this.canvasHeight);
-            ctx.stroke();
+        const startMajorX = Math.floor(leftBound / majorGridSpacing) * majorGridSpacing;
+        const endMajorX = Math.ceil(rightBound / majorGridSpacing) * majorGridSpacing;
+        for (let x = startMajorX; x <= endMajorX; x += majorGridSpacing) {
+            if (x >= 0 && x <= gridWidth) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, gridHeight);
+                ctx.stroke();
+            }
         }
         
         // Horizontal lines
-        for (let y = 0; y <= this.canvasHeight; y += majorSpacing) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(this.canvasWidth, y);
-            ctx.stroke();
+        const startMajorY = Math.floor(topBound / majorGridSpacing) * majorGridSpacing;
+        const endMajorY = Math.ceil(bottomBound / majorGridSpacing) * majorGridSpacing;
+        for (let y = startMajorY; y <= endMajorY; y += majorGridSpacing) {
+            if (y >= -300 && y <= gridHeight) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(gridWidth, y);
+                ctx.stroke();
+            }
         }
     }
     
