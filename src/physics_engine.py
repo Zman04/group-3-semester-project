@@ -62,8 +62,10 @@ class PhysicsSimulation:
         self.width = width
         self.height = height
         
-        # Create ball at physics coordinates (x=center, y=400 units above ground)
-        self.ball = Ball(width // 2, 400)
+        # Create ball at physics coordinates - 400 represents bottom position
+        temp_ball = Ball(0, 0)  # Get default radius
+        ball_center_y = 400 + temp_ball.radius
+        self.ball = Ball(width // 2, ball_center_y)
         
         # Time control properties
         self.simulation_time = 0.0
@@ -144,7 +146,11 @@ class PhysicsSimulation:
         """Reset the simulation to initial state."""
         self.simulation_time = 0.0
         self.is_playing = False
-        self.ball = Ball(self.width // 2, 400)  # Start 400 units above ground
+        # Create a temporary ball to get the default radius
+        temp_ball = Ball(0, 0)
+        # Use 400 as bottom position, add radius to get center position
+        ball_center_y = 400 + temp_ball.radius
+        self.ball = Ball(self.width // 2, ball_center_y)
         self.history.clear()
         self.time_history.clear()
         return self.get_state()
@@ -153,7 +159,11 @@ class PhysicsSimulation:
         """Set the ball's starting y position and reset the simulation."""
         self.simulation_time = 0.0
         self.is_playing = False
-        self.ball = Ball(self.width // 2, start_y)
+        # Create a temporary ball to get the default radius
+        temp_ball = Ball(0, 0)
+        # Add radius to start_y since input represents bottom of ball, but Ball constructor expects center
+        ball_center_y = start_y + temp_ball.radius
+        self.ball = Ball(self.width // 2, ball_center_y)
         self.history.clear()
         self.time_history.clear()
         return self.get_state()

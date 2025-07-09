@@ -27,42 +27,18 @@ class GUIElement:
         pass
 
 class Button(GUIElement):
-    """
-    A clickable button that can be drawn with custom images or default styling.
-
-    To use custom images, provide a dictionary for the `images` parameter, e.g.:
-    {
-        'normal': 'path/to/normal_image.png',
-        'hover': 'path/to/hover_image.png',
-        'pressed': 'path/to/pressed_image.png'
-    }
-    """
-    def __init__(self, x, y, width, height, text, callback=None, images=None):
+    """A clickable button."""
+    def __init__(self, x, y, width, height, text, callback=None):
         super().__init__(x, y, width, height)
         self.text = text
         self.callback = callback
         self.font = pygame.font.Font(None, 24)
         self.pressed = False
-        self.hover = False
-        
-        # Load images if provided
-        self.images = {}
-        if images:
-            for key, path in images.items():
-                try:
-                    self.images[key] = pygame.image.load(path).convert_alpha()
-                except pygame.error:
-                    print(f"Warning: Could not load image for button state '{key}' at {path}")
         
     def handle_event(self, event):
         if not self.visible:
             return False
-        
-        # Check for hover state
-        if event.type == pygame.MOUSEMOTION:
-            self.hover = self.rect.collidepoint(event.pos)
-        
-        # Check for clicks
+            
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
                 self.pressed = True
@@ -74,46 +50,20 @@ class Button(GUIElement):
                 self.pressed = False
                 return True
             self.pressed = False
-            
-        # Update hover state if mouse leaves the button area without moving
-        if not self.rect.collidepoint(pygame.mouse.get_pos()):
-            self.hover = False
-            
         return False
     
     def draw(self, screen):
         if not self.visible:
             return
-        
-        # Determine which image to use
-        current_image = None
-        if self.pressed and 'pressed' in self.images:
-            current_image = self.images['pressed']
-        elif self.hover and 'hover' in self.images:
-            current_image = self.images['hover']
-        elif 'normal' in self.images:
-            current_image = self.images['normal']
-
-        # Draw with image or with default style
-        if current_image:
-            # Scale image to fit button dimensions
-            scaled_image = pygame.transform.scale(current_image, (self.rect.width, self.rect.height))
-            screen.blit(scaled_image, self.rect.topleft)
-        else:
-            # Fallback to procedural drawing with hover effect
-            if self.pressed:
-                color = (100, 100, 100) # Darker grey when pressed
-            elif self.hover:
-                color = (170, 170, 170) # Lighter grey on hover
-            else:
-                color = (150, 150, 150) # Default grey
             
-            border_color = (200, 200, 200)
-            
-            pygame.draw.rect(screen, color, self.rect)
-            pygame.draw.rect(screen, border_color, self.rect, 2)
+        # Button color based on state
+        color = (100, 100, 100) if self.pressed else (150, 150, 150)
+        border_color = (200, 200, 200)
         
-        # Center text on the button
+        pygame.draw.rect(screen, color, self.rect)
+        pygame.draw.rect(screen, border_color, self.rect, 2)
+        
+        # Center text
         text_surface = self.font.render(self.text, True, (255, 255, 255))
         text_rect = text_surface.get_rect(center=self.rect.center)
         screen.blit(text_surface, text_rect)
