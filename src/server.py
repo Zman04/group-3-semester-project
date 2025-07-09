@@ -55,6 +55,14 @@ def handle_step(data):
         time_step = float(data.get('time_step', 1.0))
         emit('simulation_state', simulation.step_simulation_time(time_step))
 
+@socketio.on('set_start_y')
+def handle_set_start_y(data):
+    """Set the ball's starting y position."""
+    if request.sid in simulations:
+        simulation = simulations[request.sid]
+        start_y = float(data.get('start_y', 400))
+        emit('simulation_state', simulation.set_start_y(start_y))
+
 def update_simulations():
     """Update all active simulations."""
     while True:

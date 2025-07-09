@@ -10,8 +10,10 @@ class PhysicsSimulationUI {
         this.stepBtn = document.getElementById('stepBtn');
         this.customStepBtn = document.getElementById('customStepBtn');
         this.setTimeBtn = document.getElementById('setTimeBtn');
+        this.setStartYBtn = document.getElementById('setStartYBtn');
         this.stepValue = document.getElementById('stepValue');
         this.timeValue = document.getElementById('timeValue');
+        this.startYValue = document.getElementById('startYValue');
         this.infoPanel = document.getElementById('simulationInfo');
         
         // Viewport elements
@@ -77,6 +79,11 @@ class PhysicsSimulationUI {
             const currentTime = this.state ? this.state.time : 0;
             const timeStep = targetTime - currentTime;
             this.socket.emit('step', { time_step: timeStep });
+        });
+        
+        this.setStartYBtn.addEventListener('click', () => {
+            const startY = parseFloat(this.startYValue.value) || 400;
+            this.socket.emit('set_start_y', { start_y: startY });
         });
         
         // Viewport controls

@@ -149,6 +149,15 @@ class PhysicsSimulation:
         self.time_history.clear()
         return self.get_state()
     
+    def set_start_y(self, start_y):
+        """Set the ball's starting y position and reset the simulation."""
+        self.simulation_time = 0.0
+        self.is_playing = False
+        self.ball = Ball(self.width // 2, start_y)
+        self.history.clear()
+        self.time_history.clear()
+        return self.get_state()
+    
     def step_simulation_time(self, time_step):
         """Step the simulation by a specific time amount."""
         if time_step > 0:
