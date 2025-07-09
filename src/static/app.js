@@ -255,8 +255,8 @@ class PhysicsSimulationUI {
             ballCanvas.x, ballCanvas.y,
             ball.radius
         );
-        gradient.addColorStop(0, '#ff8080');
-        gradient.addColorStop(1, '#ff0000');
+        gradient.addColorStop(0, '#ffffff');
+        //gradient.addColorStop(1, '#ff0000'); // shading
         
         ctx.fillStyle = gradient;
         ctx.beginPath();
