@@ -1,9 +1,4 @@
-"""
-Refactored Flask Server
-
-Uses the new modular physics engine with improved error handling and logging.
-"""
-
+""" Flask Server """
 from flask import Flask, send_from_directory, request
 from flask_socketio import SocketIO, emit
 import os

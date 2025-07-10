@@ -191,7 +191,6 @@ class PhysicsSimulationUI {
             <div>Position: (${ball.x.toFixed(1)}, ${height_above_ground.toFixed(1)}) units</div>
             <div>Velocity: ${ball.velocity_y.toFixed(1)} units/s</div>
             <div>Acceleration: ${ball.acceleration_y.toFixed(1)} units/s²</div>
-            <div>Energy: ${total_energy.toFixed(0)} units</div>
             <div>Status: ${this.state.is_playing ? 'Playing' : 'Paused'}</div>
         `;
     }

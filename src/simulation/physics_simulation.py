@@ -39,10 +39,10 @@ class PhysicsSimulation:
         # Calculate ground position
         if coordinate_system == "screen":
             self.ground_y = self.height - SimulationConfig.GROUND_OFFSET
-            initial_ball_y = 100  # Near top of screen
+            initial_ball_y = SimulationConfig.DEFAULT_SCREEN_START_Y  # Near top of screen
         else:
             self.ground_y = 0  # Physics coordinates
-            initial_ball_y = 400  # Above ground in physics coordinates
+            initial_ball_y = SimulationConfig.DEFAULT_PHYSICS_START_Y  # Above ground in physics coordinates
         
         # Create ball
         self.ball = Ball(self.width // 2, initial_ball_y, coordinate_system=coordinate_system)
@@ -124,9 +124,9 @@ class PhysicsSimulation:
         self.is_playing = False
         
         if self.coordinate_system == "screen":
-            initial_y = 100
+            initial_y = SimulationConfig.DEFAULT_SCREEN_START_Y
         else:
-            initial_y = 400
+            initial_y = SimulationConfig.DEFAULT_PHYSICS_START_Y
         
         self.ball.reset_to_position(self.width // 2, initial_y)
         self.history.clear()

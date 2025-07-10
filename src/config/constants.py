@@ -17,6 +17,10 @@ class SimulationConfig:
     DEFAULT_HEIGHT: int = 600
     GROUND_OFFSET: int = 50
     
+    # Initial positions
+    DEFAULT_SCREEN_START_Y: int = 100  # Near top of screen
+    DEFAULT_PHYSICS_START_Y: int = 420  # Above ground in physics coordinates
+    
     # Physics constants
     GRAVITY: float = 6000.0  # pixels/s²
     BOUNCE_DAMPING: float = 0.8
