@@ -139,16 +139,20 @@ class PhysicsSimulation:
         """Step the simulation by a specific time amount."""
         if time_step > 0:
             # Step forward
-            steps = int(time_step / self.dt)
-            for _ in range(steps):
+            target_time = self.simulation_time + time_step
+            while self.simulation_time < target_time:
+                # Don't overshoot the target time
+                remaining_time = target_time - self.simulation_time
+                current_dt = min(self.dt, remaining_time)
+                
                 self.save_state()
                 if self.coordinate_system == "screen":
-                    self.ball.update(self.dt, self.ground_y)
+                    self.ball.update(current_dt, self.ground_y)
                     self.ball.check_ground_collision(self.ground_y)
                 else:
-                    self.ball.update(self.dt)
+                    self.ball.update(current_dt)
                     self.ball.check_ground_collision()
-                self.simulation_time += self.dt
+                self.simulation_time += current_dt
         elif time_step < 0:
             # Step backward
             target_time = max(0, self.simulation_time + time_step)
