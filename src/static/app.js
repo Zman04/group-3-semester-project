@@ -182,9 +182,9 @@ class PhysicsSimulationUI {
         // Update info panel
         const ball = this.state.ball;
         const height_above_ground = Math.max(0, ball.y - ball.radius); // Subtract radius to get bottom of ball
-        const kinetic_energy = 0.5 * ball.velocity_y * ball.velocity_y;
-        const potential_energy = 6000.0 * height_above_ground;
-        const total_energy = kinetic_energy + potential_energy;
+        // const kinetic_energy = 0.5 * ball.velocity_y * ball.velocity_y;
+        // const potential_energy = 6000.0 * height_above_ground;
+        // const total_energy = kinetic_energy + potential_energy;
         
         this.infoPanel.innerHTML = `
             <div>Time: ${this.state.time.toFixed(3)} s</div>
