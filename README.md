@@ -66,12 +66,28 @@ A web-based physics simulation of a bouncing ball with time control features. Th
 
 ```
 src/
-├── physics_engine.py  # Core physics simulation
-├── server.py         # Flask server and WebSocket handling
-└── static/
-    ├── index.html    # Frontend interface
-    ├── styles.css    # Styling
-    └── app.js        # Frontend logic and rendering
+├── config/
+│   ├── __init__.py
+│   ├── constants.py
+│   └── logging_config.py
+├── main.py
+├── physics/
+│   ├── __init__.py
+│   ├── ball.py
+│   └── constants.py
+├── physics_engine.py
+├── server.py
+├── simulation/
+│   ├── __init__.py
+│   ├── physics_simulation.py
+│   └── renderer.py
+├── static/
+│   ├── app.js
+│   ├── index.html
+│   └── styles.css
+├── ui/
+│   ├── __init__.py
+│   └── gui_elements.py
 ```
 
 ## Contributing
