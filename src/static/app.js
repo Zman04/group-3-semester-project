@@ -38,10 +38,18 @@ class PhysicsSimulationUI {
         
         // Simulation state
         this.state = null;
+        this.hasNewState = true;   // Start with true to ensure initial render
+        this.isAnimating = false;  // Track if animation loop is running
+        
+        // Performance monitoring
+        this.lastFrameTime = 0;
+        this.frameCount = 0;
+        this.fps = 0;
         
         this.setupCanvas();
         this.setupEventListeners();
         this.setupWebSocket();
+        this.startAnimationLoop();
     }
     
     setupCanvas() {
@@ -112,8 +120,48 @@ class PhysicsSimulationUI {
         this.socket.on('simulation_state', (state) => {
             this.state = state;
             this.updateUI();
-            this.draw();
+            this.hasNewState = true;  // Mark that we have new data, rendering will happen in animation loop
         });
+    }
+    
+    startAnimationLoop() {
+        if (this.isAnimating) return;  // Prevent multiple loops
+        
+        this.isAnimating = true;
+        
+        const animate = (timestamp) => {
+            // Calculate FPS for monitoring
+            if (timestamp - this.lastFrameTime >= 1000) {
+                this.fps = Math.round((this.frameCount * 1000) / (timestamp - this.lastFrameTime));
+                this.frameCount = 0;
+                this.lastFrameTime = timestamp;
+            }
+            this.frameCount++;
+            
+            // Only redraw if we have new state data or this is the first frame
+            // This decouples WebSocket timing from display refresh rate for smoother animations
+            if (this.hasNewState || !this.state) {
+                this.draw();
+                this.hasNewState = false;  // Reset the flag after drawing
+            }
+            
+            // Continue the animation loop synchronized with display refresh
+            if (this.isAnimating) {
+                requestAnimationFrame(animate);
+            }
+        };
+        
+        // Start the loop - this ensures rendering happens at the browser's optimal refresh rate
+        requestAnimationFrame(animate);
+    }
+    
+    stopAnimationLoop() {
+        this.isAnimating = false;
+    }
+    
+    requestRedraw() {
+        // Request an immediate redraw for interactive operations (zoom, pan, etc.)
+        this.hasNewState = true;
     }
     
     zoomIn() {
@@ -130,6 +178,7 @@ class PhysicsSimulationUI {
         this.canvas.style.width = `${this.canvasWidth * this.zoomLevel}px`;
         this.canvas.style.height = `${this.canvasHeight * this.zoomLevel}px`;
         this.zoomLevelSpan.textContent = `Zoom: ${Math.round(this.zoomLevel * 100)}%`;
+        this.requestRedraw();  // Request immediate visual feedback for zoom changes
     }
     
     resetView() {
