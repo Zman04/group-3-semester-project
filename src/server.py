@@ -8,7 +8,7 @@ from typing import Dict
 
 # Import from physics engine
 from physics_engine import PhysicsSimulation
-from config import setup_logging, get_logger
+from config import setup_logging, get_logger, SimulationConfig
 
 # Setup logging
 setup_logging()
@@ -135,7 +135,7 @@ def update_simulations():
                     if sid in simulations:
                         del simulations[sid]
             
-            time.sleep(1/144)  # Target 144 FPS
+            time.sleep(1/SimulationConfig.TARGET_FPS)  # Target FPS from config
         except Exception as e:
             logger.error(f"Error in simulation update loop: {e}")
             time.sleep(0.1)  # Brief pause before retrying

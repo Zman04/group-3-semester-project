@@ -70,25 +70,22 @@ src/
 │   ├── __init__.py
 │   ├── constants.py
 │   └── logging_config.py
-├── main.py
 ├── physics/
 │   ├── __init__.py
 │   ├── ball.py
 │   └── constants.py
-├── physics_engine.py
-├── server.py
-├── simulation/
-│   ├── __init__.py
-│   ├── physics_simulation.py
-│   └── renderer.py
-├── static/
-│   ├── app.js
-│   ├── index.html
-│   └── styles.css
-├── ui/
-│   ├── __init__.py
-│   └── gui_elements.py
+├── physics_engine.py       # Web-specific physics simulation
+├── physics_simulation.py   # Core physics simulation logic
+├── server.py              # Flask server with WebSocket support
+└── static/
+    ├── app.js            # Frontend JavaScript
+    ├── index.html        # Main web interface
+    └── styles.css        # Styling
 ```
+
+## Archived Desktop Version
+
+The original pygame-based desktop version has been archived to `archive/desktop-version/` for reference. The project now focuses exclusively on the web-based simulation.
 
 ## Contributing
 

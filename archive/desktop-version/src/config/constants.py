@@ -27,8 +27,8 @@ class SimulationConfig:
     MIN_BOUNCE_VELOCITY: float = 50.0
     
     # Time control
-    TARGET_FPS: int = 60
-    MAX_HISTORY_FRAMES: int = 10000  # ~166 seconds of history at 60 FPS
+    TARGET_FPS: int = 144
+    MAX_HISTORY_FRAMES: int = 500
 
 
 @dataclass

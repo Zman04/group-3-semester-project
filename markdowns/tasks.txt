@@ -1,0 +1,85 @@
+
+---
+
+### **Design Architecture Improvements**
+
+1. **Refactor Ball class**
+   Remove rendering logic (e.g., texture loading and `draw()`) from `Ball` and move it into the renderer module.
+
+2. **Unify coordinate system**
+   Always use y-up for physics internally, and apply coordinate conversion only in the rendering layer.
+
+3. **Rename `physics_engine.py`**
+   Rename this module to `web_simulation.py` or something clearer to reflect its role.
+
+4. **Support multiple objects**
+   Modify `PhysicsSimulation` to manage multiple `Ball` objects (or entities) rather than a single `self.ball`.
+
+5. **Centralize physics constants**
+   Refactor gravity, damping, and other physics constants to be instance-level properties instead of fixed class constants—enabling runtime modification.
+
+---
+
+### **Performance Optimization**
+
+6. **Lower server FPS**
+   Reduce the simulation loop from 144 FPS to 60 FPS and make this value configurable.
+
+7. **Use `socketio.sleep()`**
+   Replace `time.sleep()` with `socketio.sleep()` in async loops to ensure compatibility with eventlet/gevent servers.
+
+8. **Add threading locks**
+   Use `threading.Lock` or similar to guard shared simulation state (like the `simulations` dictionary) during concurrent access.
+
+9. **Optional: Decouple physics loop from rendering**
+   Implement a fixed-timestep physics loop and use interpolation for smooth rendering even if frames are dropped.
+
+---
+
+### **Code Quality Improvements**
+
+10. **Refactor step logic**
+    Consolidate duplicated update logic (in `update`, `step_simulation_time`, etc.) into a single `_step_once()` method.
+
+11. **Consolidate logging strategy**
+    Adjust logging levels so `DEBUG` is used for development and `INFO` or higher is used in production. Consider log rotation.
+
+12. **Remove dual-import hacks**
+    Standardize import paths across the project using package-relative imports (e.g., `python -m src.main`) and remove try/except import logic.
+
+13. **Define Socket.IO event names as constants**
+    Move event name strings like `'reset'`, `'step'`, `'set_gravity'` into a shared constants module to avoid typos and ease maintenance.
+
+---
+
+### **Extensibility for User Stories**
+
+14. **Add `set_initial_velocity()` method**
+    Allow velocity to be set on the simulation before running (e.g., via `simulation.set_initial_velocity(v)` or `reset(v)`).
+
+15. **Create `set_gravity()` method**
+    Allow runtime gravity changes per simulation, keeping logic coordinate-system aware.
+
+16. **Add velocity input to web UI**
+    Create an input field or slider in the web interface that sends initial velocity to the server via Socket.IO.
+
+17. **Add gravity input and presets to web UI**
+    Provide gravity presets (Earth, Moon, etc.) and allow custom input. Send updates to the server and apply in real-time or on reset.
+
+---
+
+### **Deployment and Production Readiness**
+
+18. **Switch to Gunicorn + eventlet for deployment**
+    Replace the Flask development server with a production-ready WSGI server setup using Gunicorn and eventlet or gevent.
+
+19. **Disable Flask debug in production**
+    Ensure `debug=True` is not used when running in production to avoid security and performance issues.
+
+20. **Test client reconnect handling**
+    Simulate client disconnection and reconnection to verify that simulations reset cleanly or resume gracefully.
+
+21. **Optimize static asset serving**
+    Enable proper caching headers or offload static file hosting to a CDN for improved browser performance.
+
+---

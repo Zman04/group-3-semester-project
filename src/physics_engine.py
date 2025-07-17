@@ -6,7 +6,7 @@ Uses the unified physics module with proper separation of concerns.
 
 from typing import Dict, Any
 from physics import Ball
-from simulation import PhysicsSimulation as BasePhysicsSimulation
+from physics_simulation import PhysicsSimulation as BasePhysicsSimulation
 from config import SimulationConfig, setup_logging, get_logger
 
 setup_logging()
