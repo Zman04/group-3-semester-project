@@ -1,4 +1,4 @@
-# Physics Ball Simulation Web App
+# StarkSims
 
 A web-based physics simulation of a bouncing ball with time control features. This application uses Python with Flask for the backend physics engine and HTML5 Canvas with WebSocket for the frontend rendering.
 
