@@ -5,7 +5,6 @@ A ball object with vertical motion simulation that can work with different coord
 """
 
 from typing import Dict, Any, Optional, Tuple
-import os
 
 try:
     from .constants import PhysicsConstants
@@ -56,32 +55,11 @@ class Ball:
         self.bounce_damping = SimulationConfig.BOUNCE_DAMPING
         self.min_bounce_velocity = SimulationConfig.MIN_BOUNCE_VELOCITY
         
-        # Rendering properties (only for screen coordinate system)
-        self.color = PhysicsConstants.DEFAULT_BALL_COLOR
-        self.texture = None
-        
-        if coordinate_system == "screen":
-            self._load_texture()
+        # No rendering properties - Ball is purely physics-focused
             
         logger.debug(f"Created Ball at ({x}, {y}) with {coordinate_system} coordinates")
     
-    def _load_texture(self) -> None:
-        """Load ball texture for rendering (only for screen coordinate system)."""
-        try:
-            # Only import pygame if we're using screen coordinates
-            import pygame
-            
-            if os.path.exists(PhysicsConstants.BALL_TEXTURE_PATH):
-                self.texture = pygame.image.load(PhysicsConstants.BALL_TEXTURE_PATH)
-                scaled_size = (int(self.radius * 2), int(self.radius * 2))
-                self.texture = pygame.transform.scale(self.texture, scaled_size)
-                logger.debug("Ball texture loaded successfully")
-            else:
-                logger.warning(f"Texture file not found: {PhysicsConstants.BALL_TEXTURE_PATH}")
-        except ImportError:
-            logger.debug("Pygame not available, skipping texture loading")
-        except Exception as e:
-            logger.warning(f"Could not load ball texture: {e}")
+
     
     def update(self, dt: float, ground_y: Optional[float] = None) -> None:
         """
@@ -137,40 +115,7 @@ class Ball:
                 if abs(self.velocity_y) < self.min_bounce_velocity:
                     self.velocity_y = 0
     
-    def draw(self, screen, ground_y: Optional[float] = None) -> None:
-        """
-        Draw the ball on the screen (only for screen coordinate system).
-        
-        Args:
-            screen: Pygame surface to draw on
-            ground_y: Ground position for shadow calculation
-        """
-        if self.coordinate_system != "screen":
-            raise ValueError("Drawing is only supported for screen coordinate system")
-        
-        try:
-            import pygame
-            import pygame.gfxdraw
-        except ImportError:
-            logger.error("Pygame not available for drawing")
-            return
-        
-        # Draw shadow
-        if ground_y is not None:
-            shadow_alpha = max(0, 100 - int(abs(self.y - ground_y) / 2))
-            if shadow_alpha > 0:
-                shadow_color = (0, 0, 0, shadow_alpha)
-                pygame.gfxdraw.filled_ellipse(screen, int(self.x), int(ground_y), 
-                                            int(self.radius), 5, shadow_color)
-        
-        # Draw ball
-        if self.texture:
-            texture_rect = self.texture.get_rect()
-            texture_rect.center = (int(self.x), int(self.y))
-            screen.blit(self.texture, texture_rect)
-        else:
-            pygame.draw.circle(screen, self.color, 
-                             (int(self.x), int(self.y)), int(self.radius))
+
     
     def get_state(self) -> Dict[str, Any]:
         """Get the current state of the ball."""
