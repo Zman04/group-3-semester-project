@@ -100,6 +100,5 @@ This project is licensed under the [MIT License](./LICENSE).
 Feel free to use, modify, or build on this project for educational or commercial purposes.  
 Credit is appreciated but not required.
 
-All code was developed by Zachary Austin.  
-Some code suggestions were generated with the help of Claude 4 (Anthropic), cited as an AI-assisted tool.
+All code was developed by Zachary Austin.
 
