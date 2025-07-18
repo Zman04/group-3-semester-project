@@ -114,7 +114,7 @@ body {
     overflow-y: auto;
 }
 
-.info-panel, .controls {
+.info-panel, .diagnostics-panel, .controls {
     background-color: #333333;
     padding: 15px;
     border-radius: 6px;

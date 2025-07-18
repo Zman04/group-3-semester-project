@@ -15,6 +15,7 @@ class PhysicsSimulationUI {
         this.timeValue = document.getElementById('timeValue');
         this.startYValue = document.getElementById('startYValue');
         this.infoPanel = document.getElementById('simulationInfo');
+        this.diagnosticsPanel = document.getElementById('simulationDiagnostics');
         
         // Viewport elements
         this.viewport = document.getElementById('physicsViewport');
@@ -45,6 +46,16 @@ class PhysicsSimulationUI {
         this.lastFrameTime = 0;
         this.frameCount = 0;
         this.fps = 0;
+        this.cacheRegens = 0;
+        this.totalFrames = 0;
+        
+        // Off-screen canvas caching for static elements
+        this.staticCanvas = document.createElement('canvas');
+        this.staticCtx = this.staticCanvas.getContext('2d');
+        this.staticCacheValid = false;
+        this.lastZoomLevel = -1;
+        this.lastScrollLeft = -1;
+        this.lastScrollTop = -1;
         
         this.setupCanvas();
         this.setupEventListeners();
@@ -56,6 +67,10 @@ class PhysicsSimulationUI {
         // Set fixed canvas size
         this.canvas.width = this.canvasWidth;
         this.canvas.height = this.canvasHeight;
+        
+        // Set up static cache canvas with same dimensions
+        this.staticCanvas.width = this.canvasWidth;
+        this.staticCanvas.height = this.canvasHeight;
         this.canvas.style.width = `${this.canvasWidth * this.zoomLevel}px`;
         this.canvas.style.height = `${this.canvasHeight * this.zoomLevel}px`;
         
@@ -164,6 +179,45 @@ class PhysicsSimulationUI {
         this.hasNewState = true;
     }
     
+    invalidateStaticCache() {
+        // Mark static cache as invalid when viewport changes
+        this.staticCacheValid = false;
+    }
+    
+    drawStaticElements() {
+        // Draw static elements (grid, axes, background) to off-screen canvas
+        const ctx = this.staticCtx;
+        
+        // Clear static canvas
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+        
+        // Draw grid
+        this.drawGrid(ctx);
+        
+        // Draw axes
+        this.drawAxes(ctx);
+        
+        // Draw ground line - dynamic based on visible area
+        const viewportRect = this.viewport.getBoundingClientRect();
+        const visibleWidth = viewportRect.width / this.zoomLevel;
+        const scrollLeft = this.viewport.scrollLeft / this.zoomLevel;
+        const groundWidth = Math.max(this.canvasWidth, scrollLeft + visibleWidth + 1000);
+        
+        ctx.strokeStyle = '#6464ff';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, this.canvasHeight - 100);
+        ctx.lineTo(groundWidth, this.canvasHeight - 100);
+        ctx.stroke();
+        
+        // Mark cache as valid
+        this.staticCacheValid = true;
+        this.lastZoomLevel = this.zoomLevel;
+        this.lastScrollLeft = this.viewport.scrollLeft;
+        this.lastScrollTop = this.viewport.scrollTop;
+    }
+    
     zoomIn() {
         this.setZoom(this.zoomLevel * 1.2);
     }
@@ -178,6 +232,7 @@ class PhysicsSimulationUI {
         this.canvas.style.width = `${this.canvasWidth * this.zoomLevel}px`;
         this.canvas.style.height = `${this.canvasHeight * this.zoomLevel}px`;
         this.zoomLevelSpan.textContent = `Zoom: ${Math.round(this.zoomLevel * 100)}%`;
+        this.invalidateStaticCache();  // Invalidate cache on zoom change
         this.requestRedraw();  // Request immediate visual feedback for zoom changes
     }
     
@@ -216,6 +271,9 @@ class PhysicsSimulationUI {
         
         this.lastPanX = e.clientX;
         this.lastPanY = e.clientY;
+        
+        // Invalidate cache on pan (throttled to reduce overhead)
+        this.invalidateStaticCache();
     }
     
     endPan() {
@@ -242,6 +300,13 @@ class PhysicsSimulationUI {
             <div>Acceleration: ${ball.acceleration_y.toFixed(1)} units/s²</div>
             <div>Status: ${this.state.is_playing ? 'Playing' : 'Paused'}</div>
         `;
+        
+        this.diagnosticsPanel.innerHTML = `
+            <div>Render FPS: ${this.fps}</div>
+            <div>Cache efficiency: ${this.totalFrames > 0 ? Math.round(((this.totalFrames - this.cacheRegens) / this.totalFrames) * 100) : 0}%</div>
+            <div>Total frames: ${this.totalFrames}</div>
+            <div>Cache regenerations: ${this.cacheRegens}</div>
+        `;
     }
     
     // Transform physics coordinates to canvas coordinates
@@ -259,28 +324,21 @@ class PhysicsSimulationUI {
         
         const ctx = this.ctx;
         
-        // Clear canvas
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+        // Check if we need to regenerate static cache
+        if (!this.staticCacheValid || 
+            this.zoomLevel !== this.lastZoomLevel ||
+            this.viewport.scrollLeft !== this.lastScrollLeft ||
+            this.viewport.scrollTop !== this.lastScrollTop) {
+            this.drawStaticElements();
+            this.cacheRegens++;
+        }
+        this.totalFrames++;
         
-        // Draw grid
-        this.drawGrid(ctx);
+        // Clear main canvas
+        ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         
-        // Draw axes
-        this.drawAxes(ctx);
-        
-        // Draw ground line - dynamic based on visible area
-        const viewportRect = this.viewport.getBoundingClientRect();
-        const visibleWidth = viewportRect.width / this.zoomLevel;
-        const scrollLeft = this.viewport.scrollLeft / this.zoomLevel;
-        const groundWidth = Math.max(this.canvasWidth, scrollLeft + visibleWidth + 1000);
-        
-        ctx.strokeStyle = '#6464ff';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(0, this.canvasHeight - 100);
-        ctx.lineTo(groundWidth, this.canvasHeight - 100);
-        ctx.stroke();
+        // Draw cached static elements (grid, axes, background, ground) in one operation
+        ctx.drawImage(this.staticCanvas, 0, 0);
         
         // Transform ball coordinates
         const ball = this.state.ball;
