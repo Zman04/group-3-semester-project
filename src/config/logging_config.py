@@ -43,9 +43,7 @@ def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
     
-    # Suppress pygame logs unless debugging
-    if numeric_level > logging.DEBUG:
-        logging.getLogger('pygame').setLevel(logging.WARNING)
+    # Note: pygame logging suppression removed since pygame is not used in web context
 
 
 def get_logger(name: str) -> logging.Logger:
