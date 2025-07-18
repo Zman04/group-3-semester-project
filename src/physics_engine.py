@@ -74,7 +74,7 @@ class PhysicsSimulation(BasePhysicsSimulation):
             start_y: Bottom position of the ball in physics coordinates
         """
         # Convert bottom position to center position
-        ball_center_y = start_y - self.ball.radius
+        ball_center_y = start_y + self.ball.radius
         return self.set_ball_start_position(self.width // 2, ball_center_y)
     
     def step_simulation_time(self, time_step: float) -> Dict[str, Any]:
