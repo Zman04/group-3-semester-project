@@ -1,2 +1,3 @@
 /src/__pycache__
 /src/physics/__pycache__
+*.pyc
